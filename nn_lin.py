@@ -27,12 +27,29 @@ class Network(nn.Module):
         super(Network, self).__init__()
         self.layer1 = nn.Linear(1, 20)
         self.layer1R = nn.ReLU()
-        self.layer2 = nn.Linear(20, 1)
-        self.layer2.register_backward_hook(GradHook(1).hook)
-        # self.layer2R = nn.ReLU()
+        self.layer2 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer2R = nn.ReLU()
+        self.layer3 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer3R = nn.ReLU()
+        self.layer4 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer4R = nn.ReLU()
+        self.layer5 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer5R = nn.ReLU()
+        self.layer6 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer6R = nn.ReLU()
+        self.layer7 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer7R = nn.ReLU()
+        self.layer8 = nn.Linear(20, 1)  # Изменил размерность входа на 20
+        
     def forward(self, x):
-        xOneOut = self.layer1R(self.layer1(x))
-        out = self.layer2(xOneOut)
+        xOneOut1 = self.layer1R(self.layer1(x))
+        xOneOut2 = self.layer2R(self.layer2(xOneOut1))
+        xOneOut3 = self.layer3R(self.layer3(xOneOut2))
+        xOneOut4 = self.layer4R(self.layer4(xOneOut3))
+        xOneOut5 = self.layer5R(self.layer5(xOneOut4))
+        xOneOut6 = self.layer6R(self.layer6(xOneOut5))
+        xOneOut7 = self.layer7R(self.layer7(xOneOut6))
+        out = self.layer8(xOneOut7)
         return out
 
 net = Network()
@@ -58,6 +75,7 @@ for i in range(epochs):
         optimizer.step()
         train_loss += loss.item()
     print("loss for epoch " + str(i) + " = " + str(train_loss))
+    # analizer.disp_hist("epoch_" + str(i))
 
 # detector.show_statistics(True)
 
