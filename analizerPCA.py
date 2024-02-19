@@ -27,7 +27,7 @@ class AlalizerPCA:
                     weights_grad = torch.cat((weights_grad, torch.flatten(current_attr.grad.data.data.to('cpu'))))
                 elif attr == 'bias':
                     bias = torch.cat((bias, torch.flatten(current_attr.data.data.to('cpu'))))
-                    bias_grad = torch.cat((bias_grad, torch.flatten(current_attr.grad.data.data.to('cpu'))))
+                    bias_grad = torch.cat((bias_grad, torch.flatten(current_attr.grad.data.to('cpu'))))
         return (bias, weights, bias_grad, weights_grad)
     def disp_hist(self):
         if self.first:
@@ -40,24 +40,24 @@ class AlalizerPCA:
         weights_matrix = params[1].view(nComponents_weights, -1)
         bias_grad_matrix = params[2].view(nComponents_bias, -1)
         weights_grad_matrix = params[3].view(nComponents_weights, -1)
+        del params
         pca = PCA(n_components=1)
         bias_pca = pca.fit_transform(bias_matrix)
         weights_pca = pca.fit_transform(weights_matrix)
         bias_grad_pca = pca.fit_transform(bias_grad_matrix)
         weights_grad_pca = pca.fit_transform(weights_grad_matrix)
 
-        params = (bias_pca, weights_pca, bias_grad_pca, weights_grad_pca)
         plt.subplot(2,2,1)
-        plt.hist(params[0], bins=100, alpha=0.5, label='bias')
+        plt.hist(bias_pca, bins=100, alpha=0.5, label='bias')
         plt.title('bias')
         plt.subplot(2,2,2)
-        plt.hist(params[1], bins=100, alpha=0.5, label='weights')
+        plt.hist(weights_pca, bins=100, alpha=0.5, label='weights')
         plt.title('weights')
         plt.subplot(2,2,3)
-        plt.hist(params[2], bins=100, alpha=0.5, label='bias_grad')
+        plt.hist(bias_grad_pca, bins=100, alpha=0.5, label='bias_grad')
         plt.title('bias_grad')
         plt.subplot(2,2,4)
-        plt.hist(params[3], bins=100, alpha=0.5, label='weights_grad')
+        plt.hist(weights_grad_pca, bins=100, alpha=0.5, label='weights_grad')
         plt.title('weights_grad')
         plt.show(block=False)
         plt.pause(1)

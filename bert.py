@@ -27,7 +27,9 @@ def learningModel(model, train_dataloader, num_epochs, batch_size, analizer):
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     for epoch in range(num_epochs):
         train_loss = 0
+        counter = 0
         for batch in train_dataloader:
+            counter += 1
             optimizer.zero_grad()
             # Tokenize input
             inputs = tokenizer(batch['sentence'], return_tensors='pt', padding=True, truncation=True, max_length=128)
@@ -40,9 +42,10 @@ def learningModel(model, train_dataloader, num_epochs, batch_size, analizer):
             loss = outputs.loss
 
             loss.backward()
+            analizer.disp_hist()
             optimizer.step()
             train_loss += loss.item()
         print("Epoch {}: Loss = {}".format(epoch, train_loss))
-        analizer.disp_hist()
+        # analizer.disp_hist()
 
 learningModel(model, train_dataloader, num_epochs, batch_size, analizer)
