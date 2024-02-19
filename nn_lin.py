@@ -7,6 +7,7 @@ import torch
 from hooks import GradHook
 from detector_metric import Detector
 from analizer import Alalizer
+from analizerPCA import AlalizerPCA
 # from detector_article import Detector
 # from detector_sd_mean import Detector
 # from detector_sd_each import Detector
@@ -27,19 +28,19 @@ class Network(nn.Module):
         super(Network, self).__init__()
         self.layer1 = nn.Linear(1, 20)
         self.layer1R = nn.ReLU()
-        self.layer2 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer2 = nn.Linear(20, 20)  
         self.layer2R = nn.ReLU()
-        self.layer3 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer3 = nn.Linear(20, 20)  
         self.layer3R = nn.ReLU()
-        self.layer4 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer4 = nn.Linear(20, 20)  
         self.layer4R = nn.ReLU()
-        self.layer5 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer5 = nn.Linear(20, 20)  
         self.layer5R = nn.ReLU()
-        self.layer6 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer6 = nn.Linear(20, 20)  
         self.layer6R = nn.ReLU()
-        self.layer7 = nn.Linear(20, 20)  # Изменил размерность входа на 20
+        self.layer7 = nn.Linear(20, 20)  
         self.layer7R = nn.ReLU()
-        self.layer8 = nn.Linear(20, 1)  # Изменил размерность входа на 20
+        self.layer8 = nn.Linear(20, 1)  
         
     def forward(self, x):
         xOneOut1 = self.layer1R(self.layer1(x))
@@ -59,11 +60,11 @@ x, y = getDatas(1000, False)
 epochs = 20
 
 analizer = Alalizer(net)
+analizerPCA = AlalizerPCA(net)
 
 criterion = nn.MSELoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
 for i in range(epochs):
-    analizer.disp_hist("epoch_" + str(i))
     train_loss = 0
     for j in range(len(x)):
         optimizer.zero_grad()
@@ -75,7 +76,9 @@ for i in range(epochs):
         optimizer.step()
         train_loss += loss.item()
     print("loss for epoch " + str(i) + " = " + str(train_loss))
-    # analizer.disp_hist("epoch_" + str(i))
+    analizer.disp_hist()
+    analizerPCA.disp_hist()
+
 
 # detector.show_statistics(True)
 

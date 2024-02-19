@@ -2,9 +2,11 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import time
+from sklearn.decomposition import PCA
+def LD(n):
+    return max([i for i in range(1, n) if n % i == 0], default=1)
 
-
-class Alalizer:
+class AlalizerPCA:
     def __init__(self, model):
         self.model = model
         self.first = True
@@ -21,17 +23,30 @@ class Alalizer:
             for attr in list_of_attr:
                 current_attr = getattr(current_attr, attr)
                 if attr == 'weight':
-                    weights = torch.cat((weights, torch.flatten(current_attr.data)))
-                    weights_grad = torch.cat((weights_grad, torch.flatten(current_attr.grad.data)))
+                    weights = torch.cat((weights, torch.flatten(current_attr.data.to('cpu'))))
+                    weights_grad = torch.cat((weights_grad, torch.flatten(current_attr.grad.data.data.to('cpu'))))
                 elif attr == 'bias':
-                    bias = torch.cat((bias, torch.flatten(current_attr.data)))
-                    bias_grad = torch.cat((bias_grad, torch.flatten(current_attr.grad.data)))
+                    bias = torch.cat((bias, torch.flatten(current_attr.data.data.to('cpu'))))
+                    bias_grad = torch.cat((bias_grad, torch.flatten(current_attr.grad.data.data.to('cpu'))))
         return (bias, weights, bias_grad, weights_grad)
     def disp_hist(self):
         if self.first:
             plt.figure(figsize=(10, 5))
             self.first = False
         params = self.get_parameters()
+        nComponents_bias = int(LD(len(params[0])))
+        nComponents_weights = int(LD(len(params[1])))
+        bias_matrix = params[0].view(nComponents_bias, -1)
+        weights_matrix = params[1].view(nComponents_weights, -1)
+        bias_grad_matrix = params[2].view(nComponents_bias, -1)
+        weights_grad_matrix = params[3].view(nComponents_weights, -1)
+        pca = PCA(n_components=1)
+        bias_pca = pca.fit_transform(bias_matrix)
+        weights_pca = pca.fit_transform(weights_matrix)
+        bias_grad_pca = pca.fit_transform(bias_grad_matrix)
+        weights_grad_pca = pca.fit_transform(weights_grad_matrix)
+
+        params = (bias_pca, weights_pca, bias_grad_pca, weights_grad_pca)
         plt.subplot(2,2,1)
         plt.hist(params[0], bins=100, alpha=0.5, label='bias')
         plt.title('bias')
