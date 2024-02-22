@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np
-from hooks import GradHook
-from detector_metric import Detector
+from hooks.hooks import GradHook
+from detector.detector_metric import Detector
 # from detector_article import Detector
 # from detector_sd_mean import Detector
 # from detector_sd_each import Detector
