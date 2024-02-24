@@ -1,3 +1,10 @@
+import multiprocessing
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    # Остальной код вашей программы
+
+
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -25,14 +32,13 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=4,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-net = Net()
+model = Net()
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-learner = Learner(net, trainloader, testloader, 2, criterion, optimizer)
+learner = Learner(model, trainloader, testloader, 2, criterion, optimizer)
 
-learner.learn()
+learner.run_learning()
 
-learner.test()
-
+learner.run_testing()
