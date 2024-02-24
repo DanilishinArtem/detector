@@ -1,5 +1,5 @@
 import torch
-
+from analizers.analizer import Alalizer
 
 class Learner:
     def __init__(self, model, trainloader, testloader, epochs, criterion, optimizer):
@@ -9,6 +9,7 @@ class Learner:
         self.testloader = testloader
         self.optimizer = optimizer
         self.criterion = criterion
+        self.analizer = Alalizer(model)
     def run_learning(self):
         for epoch in range(self.epochs):  # Проходим по данным несколько раз
             running_loss = 0.0
@@ -23,6 +24,7 @@ class Learner:
                 self.optimizer.step()
                 running_loss += loss.item()
             print('loss function for epoch ' + str(epoch) + ' = ' + str(running_loss / counter))
+            self.analizer.disp_hist('epoch_' + str(epoch))
             running_loss = 0
         print('Обучение закончено')
     def run_testing(self):
