@@ -37,8 +37,8 @@ model = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-learner = Learner(model, trainloader, testloader, 2, criterion, optimizer)
+learner = Learner(model, trainloader, testloader, 1, criterion, optimizer, 'cuda')
 
 learner.run_learning()
 
-learner.run_testing()
+# learner.run_testing()
