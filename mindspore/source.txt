@@ -1,0 +1,13 @@
+https://www.mindspore.cn/tutorial/en/0.1.0-alpha/quick_start/quick_start.html
+http://yann.lecun.com/exdb/mnist/
+./MNIST_Data/train
+./MNIST_Data/test
+
+└─MNIST_Data
+    ├─test
+    │      t10k-images.idx3-ubyte
+    │      t10k-labels.idx1-ubyte
+    │
+    └─train
+            train-images.idx3-ubyte
+            train-labels.idx1-ubyte
