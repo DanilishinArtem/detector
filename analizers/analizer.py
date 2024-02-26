@@ -30,6 +30,6 @@ class Alalizer:
         plt.subplot(1,2,2)
         plt.hist(params[1], bins=100, alpha=0.5, label='weights_grad')
         plt.title('weights_grad')
-        plt.savefig("/home/adanilishin/work/detector/pictures/" + name + ".png")
+        plt.savefig("/home/adanilishin/detector/pictures/" + name + ".png")
         plt.clf()
         plt.close()

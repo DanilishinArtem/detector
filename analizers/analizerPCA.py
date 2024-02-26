@@ -35,7 +35,6 @@ class Alalizer:
         params = self.get_parameters()
         start_dim_weights = len(params[0])
         start_dim_weights_grad = len(params[1])
-
         factors = self.find_factors(len(params[0]))
         x = int(factors[int(len(factors)/2)])
         y = int(len(params[0]) / x)
@@ -45,16 +44,16 @@ class Alalizer:
 
         params[0] = pca.fit_transform(params[0])
         cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)
-        index_99_variance = np.argmax(cumulative_variance_ratio >= self.div_perc)
+        index_99_variance = max(np.argmax(cumulative_variance_ratio >= self.div_perc), 1)
         params[0] = params[0][:, :index_99_variance].flatten()
 
         params[1] = pca.fit_transform(params[1])
         cummulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)
-        index_99_variance = np.argmax(cummulative_variance_ratio >= self.div_perc)
+        index_99_variance = max(np.argmax(cummulative_variance_ratio >= self.div_perc), 1)
         params[1] = params[1][:, :index_99_variance].flatten()
 
-        print('compression for weights: ' + str(1 - (len(params[0]) / start_dim_weights)) + '%')
-        print('compression for weights_grad: ' + str(1 - (len(params[1]) / start_dim_weights_grad)) + '%')
+        print('compression for weights: ' + str((1 - (len(params[0]) / start_dim_weights))*100) + '%')
+        print('compression for weights_grad: ' + str((1 - (len(params[1]) / start_dim_weights_grad))*100) + '%')
 
         plt.figure(figsize=(20, 10))
         plt.subplot(1,2,1)
@@ -63,6 +62,6 @@ class Alalizer:
         plt.subplot(1,2,2)
         plt.hist(params[1], bins=100, alpha=0.5, label='weights_grad')
         plt.title('weights_grad')
-        plt.savefig("/home/adanilishin/work/detector/pictures/" + name + ".png")
+        plt.savefig("/home/adanilishin/detector/pictures/" + name + ".png")
         plt.clf()
         plt.close()
