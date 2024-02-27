@@ -1,7 +1,7 @@
 import torch
-# from analizers.analizer import Alalizer
+from analizers.analizer import Alalizer
 # from analizers.analizerPCA import Alalizer
-from analizers.analizerPCA_test import Alalizer
+# from analizers.analizerPCA_test import Alalizer
 
 class Learner:
     def __init__(self, model, trainloader, testloader, epochs, criterion, optimizer, device):
@@ -12,8 +12,8 @@ class Learner:
         self.optimizer = optimizer
         self.criterion = criterion
         self.device = device
-        self.analizer = Alalizer(model, 0.99)
-        # self.analizer = Alalizer(model)
+        # self.analizer = Alalizer(model, 0.99)
+        self.analizer = Alalizer(model)
     def run_learning(self):
         self.model = self.model.to(self.device)
         for epoch in range(self.epochs):
