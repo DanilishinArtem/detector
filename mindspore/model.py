@@ -1,7 +1,9 @@
 import mindspore.ops.operations as P
-from hooks.hooks import GradHook
-from hooks.hooks import ForwardHook
+# from hooks.hooks import GradHook
+# from hooks.hooks import ForwardHook
 from basic_functions import *
+from my_hooks import create_forward_hook
+
 
 
 class LeNet5(nn.Cell):
@@ -16,8 +18,8 @@ class LeNet5(nn.Cell):
         self.conv2 = conv(6, 16, 5)
         self.fc1 = fc_with_initialize(16 * 5 * 5, 120)
         self.fc2 = fc_with_initialize(120, 84)
-        # self.fc2.register_backward_hook(GradHook(10, 1, 2000).hook)
-        # self.fc2.register_forward_hook(ForwardHook(10, 1, 2000).hook)
+        hook = create_forward_hook(100, 1, 20, self.fc2.weight, self.fc2.bias)
+        self.fc2.register_forward_hook(hook)
         self.fc3 = fc_with_initialize(84, 10)
         self.relu = nn.ReLU()
         self.max_pool2d = nn.MaxPool2d(kernel_size=2, stride=2)

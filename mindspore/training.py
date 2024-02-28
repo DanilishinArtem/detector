@@ -7,22 +7,27 @@ from create_dataset import create_dataset
 import os
 from mindspore.train.callback import ModelCheckpoint, CheckpointConfig
 from mindspore.nn.loss import SoftmaxCrossEntropyWithLogits
+from mindspore import context, Tensor
 
+# context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
+context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
 
 def train_net(model, epoch_size, mnist_path, repeat_size):
     print("============== Starting Training ==============")
-    #load training dataset
-    config_ck = CheckpointConfig(save_checkpoint_steps=1875, keep_checkpoint_max=10)
-    ckpoint_cb = ModelCheckpoint(prefix="checkpoint_lenet", config=config_ck)
+    # Load training dataset
     ds_train = create_dataset(os.path.join(mnist_path, "train"), 32, repeat_size)
-    model.train(epoch_size, ds_train, callbacks=[ckpoint_cb, LossMonitor()], dataset_sink_mode=False) 
-
+    
+    # Define LossMonitor callback
+    loss_cb = LossMonitor()
+    
+    # Start training
+    model.train(epoch_size, ds_train, callbacks=[loss_cb], dataset_sink_mode=False) 
 
 if __name__ == "__main__":
     epoch_size = 1
-    mnist_path = "./MNIST_Data"
+    mnist_path = "/home/adanilishin/detector/mindspore/MNIST_Data"
     repeat_size = epoch_size
-    net_loss = SoftmaxCrossEntropyWithLogits(is_grad=False, sparse=True, reduction='mean')
+    net_loss = SoftmaxCrossEntropyWithLogits(sparse=True, reduction='mean')
     lr = 0.01
     momentum = 0.9
     network = LeNet5()

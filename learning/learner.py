@@ -15,7 +15,7 @@ class Learner:
         # self.analizer = Alalizer(model, 0.99)
         self.analizer = Alalizer(model)
     def run_learning(self):
-        self.model = self.model.to(self.device)
+        # self.model.to(self.device)
         for epoch in range(self.epochs):
             running_loss = 0.0
             counter = 0
@@ -36,22 +36,22 @@ class Learner:
             print('loss function for epoch ' + str(epoch) + ' = ' + str(running_loss / counter))
             running_loss = 0
             print('total number of samples = ' + str(counter))
-        self.model = self.model.to(self.device)
+        self.model.to('cpu')
         print('Обучение закончено')
     def run_testing(self):
         correct = 0
         total = 0
         counter = 0
-        self.model = self.model.to(self.device)
+        self.model.to(self.device)
         with torch.no_grad():
             for data in self.testloader:
                 counter += 1
                 images, labels = data
-                self.images = self.images.to(self.device)
-                self.labels = self.labels.to(self.device)
+                images = images.to(self.device)
+                labels = labels.to(self.device)
                 outputs = self.model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
             print('accuracy during ' + str(counter) + ' numbers = ' + str(100 * correct / total) + '%')
-        self.model = self.model.to('cpu')
+        self.model.to('cpu')

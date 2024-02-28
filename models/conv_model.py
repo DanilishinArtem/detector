@@ -13,11 +13,13 @@ class Net(nn.Module):
         # self.fc1.register_backward_hook(GradHook(1000, 1, 2000).hook)
         # self.fc1.register_backward_hook(GradHookTensor(1000, 1, 2000).hook)
         # self.fc1.register_forward_hook(ForwardHook(1000, 1, 2000).hook)
+        
         # self.fc1.register_forward_hook(ForwardHookTensor(1000, 1, 2000).hook)
+        # hook = create_forward_hook(1000, 1, 2000, self.fc1.weight.data)
+        # self.fc1.register_forward_hook(hook)
 
-
-
-        self.fc1.register_full_backward_pre_hook(GradHook_output_prehook(1000, 1, 2000).hook)
+        # GradHook_output_prehook.hook.my_weights = self.fc1.weight.data
+        # self.fc1.register_full_backward_pre_hook(GradHook_output_prehook(1000, 1000, 2000).hook)
         # self.fc1.register_full_backward_hook(GradHook_input_hook(1000, 1, 2000).hook)
 
         # register_full_backward_hook register_backward_hook 

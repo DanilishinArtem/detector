@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from learning.learner import Learner
 from models.conv_model import Net
+from hooks.hooks import *
 
 def scripts_model_conv():
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -22,18 +23,22 @@ def scripts_model_conv():
     classes = ('plane', 'car', 'bird', 'cat',
             'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-    model = Net()
-
     criterion = nn.CrossEntropyLoss()
+
+    return [trainloader, testloader, criterion]
+
+if __name__ == '__main__':
+    trainloader, testloader, criterion = scripts_model_conv()
+
+    model = Net()
+    model.to('cuda')
+    hook = create_forward_hook(1000, 1, 2000, model.fc1.weight.data)
+    model.fc1.register_forward_hook(hook)
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     learner = Learner(model, trainloader, testloader, 1, criterion, optimizer, 'cuda')
+    # learner = Learner(model, trainloader, testloader, 1, criterion, optimizer, 'cpu')
 
     learner.run_learning()
-
     # learner.run_testing()
-
-
-if __name__ == '__main__':
-    scripts_model_conv()
 
