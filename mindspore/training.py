@@ -23,6 +23,8 @@ def train_net(model, epoch_size, mnist_path, repeat_size):
     # Start training
     model.train(epoch_size, ds_train, callbacks=[loss_cb], dataset_sink_mode=False) 
 
+from mindspore import export
+
 if __name__ == "__main__":
     epoch_size = 1
     mnist_path = "/home/adanilishin/detector/mindspore/MNIST_Data"
@@ -33,5 +35,8 @@ if __name__ == "__main__":
     network = LeNet5()
     net_opt = nn.Momentum(network.trainable_params(), lr, momentum)
     model = Model(network, net_loss, net_opt, metrics={"Accuracy": Accuracy()})
-
+    
+    # ds_train = create_dataset(os.path.join(mnist_path, "train"), 32, repeat_size)
+    # export(network, ds_train, file_name="lenet5", file_format="ONNX")
+    
     train_net(model, epoch_size, mnist_path, repeat_size)
