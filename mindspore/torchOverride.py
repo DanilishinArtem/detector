@@ -35,10 +35,11 @@ def override_GRAPH_MODE(self, network, loss_fn=None, optimizer=None, metrics=Non
         return self.relu(x)
     new_relu_cell.construct = new_func_construct
     
-    new_node = Node.create_call_cell(cell=new_relu_cell, targets=[stree.unique_name("x")],
-                                args=[ScopedValue.create_naming_value("x")], name="new_relu")
-    stree.replace(relu_node, [new_node])
-    print(self._train_network)
+    self._train_network.network._backbone.relu = new_relu_cell
+    # new_node = Node.create_call_cell(cell=new_relu_cell, targets=[stree.unique_name("x")],
+    #                             args=[ScopedValue.create_naming_value("x")], name="new_relu")
+    # stree.replace(relu_node, [new_node])
+    # print(self._train_network)
 
 Model.Model.__init__ = override_GRAPH_MODE
 
