@@ -3,6 +3,7 @@ import mindspore.ops.operations as P
 # from hooks.hooks import ForwardHook
 from basic_functions import *
 from my_hooks import create_forward_hook
+from my_hooks import create_matmul_hook
 
 
 
@@ -17,6 +18,14 @@ class LeNet5(nn.Cell):
         self.conv1 = conv(1, 6, 5)
         self.conv2 = conv(6, 16, 5)
         self.fc1 = fc_with_initialize(16 * 5 * 5, 120)
+
+        # hook = create_forward_hook(10, 1, 30, self.fc1.weight.data, self.fc1.bias.data)
+        # self.fc1.register_backward_hook(hook)
+
+        hook = create_matmul_hook(self.fc1, 1, 30)
+        self.fc1.register_forward_pre_hook(hook)
+        # self.fc1.register_forward_hook(hook)
+
         self.fc2 = fc_with_initialize(120, 84)
         self.fc3 = fc_with_initialize(84, 10)
         self.relu = nn.ReLU()

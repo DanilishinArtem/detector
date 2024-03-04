@@ -8,6 +8,8 @@ import os
 from mindspore.train.callback import ModelCheckpoint, CheckpointConfig
 from mindspore.nn.loss import SoftmaxCrossEntropyWithLogits
 from mindspore import context, Tensor
+import logging
+
 
 # context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
 context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
@@ -27,7 +29,7 @@ from mindspore import export
 
 if __name__ == "__main__":
     epoch_size = 1
-    mnist_path = "/home/adanilishin/detector/mindspore/MNIST_Data"
+    mnist_path = "/home/adanilishin/MNIST_Data"
     repeat_size = epoch_size
     net_loss = SoftmaxCrossEntropyWithLogits(sparse=True, reduction='mean')
     lr = 0.01
@@ -35,8 +37,4 @@ if __name__ == "__main__":
     network = LeNet5()
     net_opt = nn.Momentum(network.trainable_params(), lr, momentum)
     model = Model(network, net_loss, net_opt, metrics={"Accuracy": Accuracy()})
-    
-    # ds_train = create_dataset(os.path.join(mnist_path, "train"), 32, repeat_size)
-    # export(network, ds_train, file_name="lenet5", file_format="ONNX")
-    
     train_net(model, epoch_size, mnist_path, repeat_size)
