@@ -5,6 +5,7 @@ from mindspore import Tensor
 import mindspore as ms
 import types
 import functools
+from functools import wraps
 
 model = None
 orig_constr = None
@@ -67,7 +68,7 @@ def override_check_network_mode(self, network, is_train):
     #     return orig_constr(self, x)
 
     ret_train_network = backup_check_network_mode(self, network, is_train)
-    logging.warning('========================================')
+    # logging.warning('========================================')
     logging.warning('current step: ' + str(self._current_step_num))
     # if self.current_step_num == 10:
     #     logging.warning('[weight fault injected to the layer fc2]')
@@ -75,13 +76,23 @@ def override_check_network_mode(self, network, is_train):
     #     self._network.fc2.weight.set_data(Tensor(np.full_like(copy_weight, 1000)))
 
     if self._current_step_num == 10:
+        logging.warning('[overriding the layer fc2]')
         temp = network_.fc2.construct
-        @functools.wraps(temp)
-        def construct(x):
-            # print('hello')
-            return temp(x * 0)
-        funcType = types.MethodType
-        network_.fc2.construct = funcType(ms.jit(construct), network_.fc2)
+        # @functools.wraps(temp)
+        # def construct(self, x):
+        #     print('hello')
+        #     return temp(x)
+        # funcType = types.MethodType
+        # network_.fc2.construct = funcType(construct, network_.fc2)
+
+        def new_construct(temp):
+            @wraps(temp)
+            def wrapper(self, x):
+                print('hello')
+                return temp(self, x)
+        network_.fc2.construct = new_construct(temp)
+
+
         self.__init__(network_, loss_fn_, optimizer_, metrics_, eval_network_, eval_indexes_, amp_level_, boost_level_, **kwargs_)
         
 
