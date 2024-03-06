@@ -11,21 +11,20 @@ from mindspore import context, Tensor
 import logging
 
 
-# context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
-context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
+context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
+# context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
 
 def train_net(model, epoch_size, mnist_path, repeat_size):
     print("============== Starting Training ==============")
     # Load training dataset
     ds_train = create_dataset(os.path.join(mnist_path, "train"), 32, repeat_size)
-    
     # Define LossMonitor callback
     loss_cb = LossMonitor()
-    
     # Start training
     model.train(epoch_size, ds_train, callbacks=[loss_cb], dataset_sink_mode=False) 
 
 from mindspore import export
+from mindspore.nn.layer.basic import Dense
 
 if __name__ == "__main__":
     epoch_size = 1
@@ -37,4 +36,5 @@ if __name__ == "__main__":
     network = LeNet5()
     net_opt = nn.Momentum(network.trainable_params(), lr, momentum)
     model = Model(network, net_loss, net_opt, metrics={"Accuracy": Accuracy()})
+
     train_net(model, epoch_size, mnist_path, repeat_size)

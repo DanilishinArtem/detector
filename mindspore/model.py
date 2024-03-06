@@ -22,8 +22,8 @@ class LeNet5(nn.Cell):
         # hook = create_forward_hook(10, 1, 30, self.fc1.weight.data, self.fc1.bias.data)
         # self.fc1.register_backward_hook(hook)
 
-        hook = create_matmul_hook(self.fc1, 1, 30)
-        self.fc1.register_forward_pre_hook(hook)
+        # hook = create_matmul_hook(self.fc1, 1, 30)
+        # self.fc1.register_forward_pre_hook(hook)
         # self.fc1.register_forward_hook(hook)
 
         self.fc2 = fc_with_initialize(120, 84)

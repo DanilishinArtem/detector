@@ -53,6 +53,7 @@ def create_matmul_hook(layer, time, boarder):
         counter += 1
         if time > 0 and counter == boarder:
             time -= 1
+            logging.warning('has layer matmul:' + str(hasattr(layer, 'matmul')))
             layer.matmul = new_matmul
         else:
             layer.matmul = stock_matmul
