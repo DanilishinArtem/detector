@@ -13,8 +13,8 @@ from src.utils import BertPoetry, BertPoetryCell, BertLearningRate, BertPoetryMo
 from mindspore.nn.wrap.loss_scale import DynamicLossScaleUpdateCell
 from mindspore.nn.optim import AdamWeightDecay
 
-context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
-# context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
+# context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
+context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
 
 def train_net(model, epoch_size, dataset):
     print("============== Starting Training ==============")
@@ -24,7 +24,7 @@ def train_net(model, epoch_size, dataset):
     # Define LossMonitor callback
     loss_cb = LossMonitor()
     # Start training
-    model.train(epoch_size, dataset, callbacks=[loss_cb], dataset_sink_mode=False)
+    model.train(epoch_size, dataset, callbacks=[loss_cb], dataset_sink_mode=True)
 
 from mindspore import export
 from mindspore.nn.layer.basic import Dense
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     update_cell = DynamicLossScaleUpdateCell(loss_scale_value=2**32, scale_factor=2, scale_window=1000)
     netwithgrads = BertPoetryCell(netwithloss, optimizer=optimizer, scale_update_cell=update_cell)
     model = Model(netwithgrads)
-    train_net(model, epoch_size, repeat_size)
+    train_net(model, epoch_size, dataset)
