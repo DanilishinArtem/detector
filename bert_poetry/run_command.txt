@@ -1,0 +1,3 @@
+python poetry.py --device_target=CPU --train=True --export=False
+https://www.mindspore.cn/tutorial/training/en/r1.2/advanced_use/nlp_bert_poetry.html
+change /bert_poetry/src/finetune_config.py - dataset_path -> /path/to/bert_base.ckpt

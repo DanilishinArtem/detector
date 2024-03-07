@@ -6,6 +6,7 @@ import mindspore as ms
 import types
 import functools
 from functools import wraps
+import mindspore.nn as nn
 
 model = None
 orig_constr = None
@@ -50,52 +51,39 @@ def override_Model(self, network, loss_fn=None, optimizer=None, metrics=None, ev
     return backup_Model(self, network, loss_fn, optimizer, metrics, eval_network, eval_indexes, amp_level, boost_level, **kwargs)
 Model.Model.__init__ = override_Model
 
+class ModifiedDense(nn.Dense):
+    def __init__(self, *args, **kwargs):
+        super(ModifiedDense, self).__init__(*args, **kwargs)
 
+    def construct(self, x):
+        print('Hello')  # Дополнительная логика
+        return super().construct(x)
 
+temp = None
 
 backup_check_network_mode = Model.Model._check_network_mode
 def override_check_network_mode(self, network, is_train):
     global train_model
-
-    # def create_mod_constr(orig_constr):
-    #     def foo(self, x):
-    #         nonlocal orig_constr
-    #         return orig_constr(x)
-    #     return foo
-    
-    # def modif_constr(self, x):
-    #     logging.warning('hello from forward')
-    #     return orig_constr(self, x)
-
+    global temp
     ret_train_network = backup_check_network_mode(self, network, is_train)
-    # logging.warning('========================================')
-    logging.warning('current step: ' + str(self._current_step_num))
-    # if self.current_step_num == 10:
-    #     logging.warning('[weight fault injected to the layer fc2]')
-    #     copy_weight = self.network.fc2.weight.copy().data.asnumpy()
-    #     self._network.fc2.weight.set_data(Tensor(np.full_like(copy_weight, 1000)))
-
     if self._current_step_num == 10:
-        logging.warning('[overriding the layer fc2]')
-        temp = network_.fc2.construct
-        # @functools.wraps(temp)
-        # def construct(self, x):
-        #     print('hello')
-        #     return temp(x)
-        # funcType = types.MethodType
-        # network_.fc2.construct = funcType(construct, network_.fc2)
-
-        def new_construct(temp):
-            @wraps(temp)
-            def wrapper(self, x):
-                print('hello')
-                return temp(self, x)
-        network_.fc2.construct = new_construct(temp)
-
-
+        # modified_dense_layer = ModifiedDense(**vars(network_.fc2))
+        temp = network_.fc2
+        modified_dense_layer = ModifiedDense(in_channels=network_.fc2.in_channels,
+                                     out_channels=network_.fc2.out_channels,
+                                     weight_init=network_.fc2.weight,
+                                     bias_init=network_.fc2.bias,
+                                     has_bias=network_.fc2.has_bias,
+                                     activation=network_.fc2.activation)
+        network_.fc2 = modified_dense_layer
         self.__init__(network_, loss_fn_, optimizer_, metrics_, eval_network_, eval_indexes_, amp_level_, boost_level_, **kwargs_)
-        
-
+    elif self._current_step_num == 11:
+        network_.fc2 = temp
+        self.__init__(network_, loss_fn_, optimizer_, metrics_, eval_network_, eval_indexes_, amp_level_, boost_level_, **kwargs_)
 
     return ret_train_network
 Model.Model._check_network_mode = override_check_network_mode
+
+
+# mindspore.nn.grad.cell_grad
+# mindspore.nn.wrap.cell_wrap -> TrainOneStepCell
