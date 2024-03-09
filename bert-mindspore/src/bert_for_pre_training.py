@@ -76,7 +76,7 @@ class GetMaskedLMOutput(nn.Cell):
         super(GetMaskedLMOutput, self).__init__()
         self.width = config.hidden_size
         self.reshape = P.Reshape()
-        self.gather = P.GatherV2()
+        self.gather = P.Gather()
 
         weight_init = TruncatedNormal(config.initializer_range)
         self.dense = nn.Dense(self.width,
@@ -132,7 +132,7 @@ class GetNextSentenceOutput(nn.Cell):
     """
     def __init__(self, config):
         super(GetNextSentenceOutput, self).__init__()
-        self.log_softmax = LogSoftmax()
+        self.log_softmax = _selected_ops.LogSoftmax()
         weight_init = TruncatedNormal(config.initializer_range)
         self.dense = nn.Dense(config.hidden_size, 2,
                               weight_init=weight_init, has_bias=True).to_float(config.compute_type)

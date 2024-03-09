@@ -70,10 +70,13 @@ def test_train():
     '''
     finetune function
     '''
-    target = args_opt.device_target
-    if target == "Ascend":
-        devid = int(os.getenv('DEVICE_ID'))
-        context.set_context(mode=context.GRAPH_MODE, device_target="Ascend", device_id=devid)
+    # target = args_opt.device_target
+    context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
+    
+    # if target == "Ascend":
+    #     devid = int(os.getenv('DEVICE_ID'))
+    #     # context.set_context(mode=context.GRAPH_MODE, device_target="Ascend", device_id=devid)
+    #     context.set_context(mode=context.PYNATIVE_MODE, device_target="Ascend", device_id=devid)
 
     poetry, tokenizer, keep_words = create_tokenizer()
     print(len(keep_words))

@@ -107,6 +107,9 @@ def create_poetry_dataset(batch_size, poetry, tokenizer):
     float_type_cast_op = C.TypeCast(mstype.float32)
     ds = ds.map(input_columns="input_ids", operations=int_type_cast_op)
     ds = ds.map(input_columns="token_type_id", operations=int_type_cast_op)
-    ds = ds.map(input_columns="pad_mask", operations=float_type_cast_op)
+    # ds = ds.map(input_columns="pad_mask", operations=float_type_cast_op)
     ds = ds.batch(batch_size, drop_remainder=True)
     return ds
+
+
+# construct(self, input_ids, token_type_ids, input_mask):

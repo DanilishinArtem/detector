@@ -128,7 +128,7 @@ class EmbeddingLookup(nn.Cell):
                                          name='embedding_table')
         self.expand = P.ExpandDims()
         self.shape_flat = (-1,)
-        self.gather = P.GatherV2()
+        self.gather = P.Gather()
         self.one_hot = P.OneHot()
         self.on_value = Tensor(1.0, mstype.float32)
         self.off_value = Tensor(0.0, mstype.float32)
@@ -195,7 +195,7 @@ class EmbeddingPostprocessor(nn.Cell):
         self.shape = tuple(embedding_shape)
         self.layernorm = nn.LayerNorm((embedding_size,))
         self.dropout = nn.Dropout(1 - dropout_prob)
-        self.gather = P.GatherV2()
+        self.gather = P.Gather()
         self.use_relative_positions = use_relative_positions
         self.slice = P.StridedSlice()
         self.full_position_embeddings = Parameter(initializer
@@ -340,7 +340,7 @@ class RelaPosEmbeddingsGenerator(nn.Cell):
         self.on_value = Tensor(1.0, mstype.float32)
         self.off_value = Tensor(0.0, mstype.float32)
         self.shape = P.Shape()
-        self.gather = P.GatherV2()  # index_select
+        self.gather = P.Gather()  # index_select
         self.matmul = P.BatchMatMul()
 
     def construct(self):
@@ -825,14 +825,12 @@ class CreateAttentionMaskFromInputMask(nn.Cell):
         self.input_mask = None
 
         if not self.input_mask_from_dataset:
-            self.input_mask = initializer(
-                "ones", [config.batch_size, config.seq_length], mstype.int32)
+            self.input_mask = Tensor(initializer("ones", [config.batch_size, config.seq_length], mstype.int32))
 
         self.cast = P.Cast()
         self.reshape = P.Reshape()
         self.shape = (config.batch_size, 1, config.seq_length)
-        self.broadcast_ones = initializer( 
-            "ones", [config.batch_size, config.seq_length, 1], mstype.float32)
+        self.broadcast_ones = Tensor(initializer("ones", [config.batch_size, config.seq_length, 1], mstype.float32))
         self.batch_matmul = P.BatchMatMul()
 
     def construct(self, input_mask):
@@ -879,8 +877,7 @@ class BertModel(nn.Cell):
                                   self.embedding_size]
 
         if not self.token_type_ids_from_dataset:
-            self.token_type_ids = initializer(
-                "zeros", [self.batch_size, self.seq_length], mstype.int32).to_tensor()
+            self.token_type_ids = Tensor(initializer("zeros", [self.batch_size, self.seq_length], mstype.int32))
 
         self.bert_embedding_lookup = EmbeddingLookup(
             vocab_size=config.vocab_size,

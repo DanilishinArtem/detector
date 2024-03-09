@@ -117,7 +117,7 @@ class BertPoetryCell(nn.Cell):
         if not self.gpu_target:
             init = self.alloc_status()
             clear_before_grad = self.clear_before_grad(init)
-            F.control_depend(loss, init)
+            loss = F.depend(loss, init)
             self.depend_parameter_use(clear_before_grad, scaling_sens)
         grads = self.grad(self.network, weights)(input_ids,
                                                  token_type_id,
@@ -131,8 +131,8 @@ class BertPoetryCell(nn.Cell):
         if not self.gpu_target:
             flag = self.get_status(init)
             flag_sum = self.reduce_sum(init, (0,))
-            F.control_depend(grads, flag)
-            F.control_depend(flag, flag_sum)
+            grads = F.depend(grads, flag)
+            flag = F.depend(flag, flag_sum)
         else:
             flag_sum = self.hyper_map(F.partial(_grad_overflow), grads)
             flag_sum = self.addn(flag_sum)
