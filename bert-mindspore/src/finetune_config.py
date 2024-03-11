@@ -24,16 +24,16 @@ from .bert_model import BertConfig
 bs = 16
 
 cfg = edict({
-    'dict_path': '/home/adanilishin/bert-mindspore/vocab.txt',
+    'dict_path': '/home/adanilishin/detector/bert-mindspore/vocab.txt',
     'disallowed_words': ['（', '）', '(', ')', '__', '《', '》', '【', '】', '[', ']'],
     'max_len': 64,
     'min_word_frequency': 8,
-    'dataset_path': '/home/adanilishin/bert_data/poetry.txt',
+    'dataset_path': '/home/adanilishin/detector/bert_data/poetry.txt',
     'batch_size': bs,
     'epoch_num': 20,
     'ckpt_prefix': 'poetry',
     'ckpt_dir': None,
-    'pre_training_ckpt': '/home/adanilishin/bert_data/bert_base.ckpt',
+    'pre_training_ckpt': '/home/adanilishin/detector/bert_data/bert_base.ckpt',
     'optimizer': 'AdamWeightDecayDynamicLR',
     'AdamWeightDecay': edict({
         'learning_rate': 3e-5,
