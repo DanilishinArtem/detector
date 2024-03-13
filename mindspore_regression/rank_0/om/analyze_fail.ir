@@ -1,0 +1,127 @@
+# ===============================================================================================
+# The following shows the last analyze fail log message.
+# ===============================================================================================
+
+----------------------------------------------------
+- Caught exception:
+----------------------------------------------------
+For primitive[BitwiseXor], the input argument[x] must be a type of {Tensor[Bool], Tensor[Int16], Tensor[Int32], Tensor[Int64], Tensor[Int8], Tensor[UInt16], Tensor[UInt32], Tensor[UInt64], Tensor[UInt8]}, but got Tensor[Float32].
+
+----------------------------------------------------
+- C++ Call Stack: (For framework developers)
+----------------------------------------------------
+mindspore/core/utils/check_convert_utils.cc:932 CheckTensorSubClass
+
+----------------------------------------------------
+- The Traceback of Net Construct Code:
+----------------------------------------------------
+# 0 In file regresstion.py:35
+    return x^2
+           ^
+# 1 In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/function/math_func.py:3039
+    return bitwise_xor_(input, other)
+           ^
+
+# ===============================================================================================
+# The following shows the IR when the function graphs evaluation fails to help locate the problem.
+# You can search the last ------------------------> to the node which is evaluated failure.
+# Refer to https://www.mindspore.cn/search?inputValue=analyze_fail.ir to get more instructions.
+# ===============================================================================================
+
+# IR entry: @foo_1
+# Total subgraphs: 0
+
+# Total params: 1
+# Params:
+%para1_x : <null>
+
+subgraph attr:
+subgraph instance: foo_1 : 0x5d1ec70
+# In file regresstion.py:34/def foo(x):/
+subgraph @foo_1(%para1_x) {
+
+#------------------------> 0
+  %1(CNode_5) = S_Prim_bitwise_xor(%para1_x, I64(2))
+      : (<Tensor[Float32], (1, 1)>, <Int64, NoShape>) -> (<null>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+  Return(%1)
+      : (<null>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+}
+# Order:
+#   1: @foo_1:CNode_5{[0]: ValueNode<DoSignaturePrimitive> S_Prim_bitwise_xor, [1]: param_x, [2]: ValueNode<Int64Imm> 2}
+#   2: @foo_1:CNode_6{[0]: ValueNode<Primitive> Return, [1]: CNode_5}
+
+
+subgraph attr:
+subgraph instance: _tensor_bitwise_xor_scalar_3 : 0x5d278d0
+# In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/composite/multitype_ops/bitwise_xor_impl.py:42/def _tensor_bitwise_xor_scalar(x, y):/
+subgraph @_tensor_bitwise_xor_scalar_3(%para2_x, %para3_y) {
+  %1(CNode_5) = resolve(SymbolStr, F)
+      : (<External, NoShape>, <External, NoShape>) -> (<External, NoShape>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+  %2(CNode_5) = getattr(%1, "bitwise_xor")
+      : (<External, NoShape>, <String, NoShape>) -> (<Func, NoShape>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+
+#------------------------> 1
+  %3(CNode_5) = %2(%para2_x, %para3_y)
+      : (<Tensor[Float32], (1, 1)>, <Int64, NoShape>) -> (<null>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+  Return(%3)
+      : (<null>)
+      #scope: (Default)
+      # In file regresstion.py:35/    return x^2/
+}
+# Order:
+#   1: @_tensor_bitwise_xor_scalar_3:CNode_5{[0]: ValueNode<Primitive> resolve, [1]: ValueNode<NameSpace> SymbolStr: 'Namespace:mindspore.ops.composite.multitype_ops.bitwise_xor_impl', [2]: ValueNode<Symbol> F}
+#   2: @_tensor_bitwise_xor_scalar_3:CNode_5{[0]: ValueNode<Primitive> getattr, [1]: CNode_5, [2]: ValueNode<StringImm> bitwise_xor}
+#   3: @_tensor_bitwise_xor_scalar_7:CNode_8{[0]: ValueNode<Primitive> resolve, [1]: ValueNode<NameSpace> CommonOPS: 'Namespace:mindspore._extends.parse.trope', [2]: ValueNode<Symbol> MakeTuple}
+#   4: @_tensor_bitwise_xor_scalar_7:CNode_9{[0]: CNode_8, [1]: param_x, [2]: param_y}
+#   5: @_tensor_bitwise_xor_scalar_3:CNode_5{[0]: CNode_5, [1]: param_x, [2]: param_y}
+#   6: @_tensor_bitwise_xor_scalar_3:CNode_5{[0]: ValueNode<Primitive> Return, [1]: CNode_5}
+
+
+subgraph attr:
+subgraph instance: bitwise_xor_4 : 0x5d507a0
+# In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/function/math_func.py:3002/def bitwise_xor(input, other):/
+subgraph @bitwise_xor_4(%para4_input, %para5_other) {
+  %1(CNode_10) = resolve(SymbolStr, bitwise_xor_)
+      : (<External, NoShape>, <External, NoShape>) -> (<Func, NoShape>)
+      #scope: (Default)
+      # In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/function/math_func.py:3039/    return bitwise_xor_(input, other)/
+
+#------------------------> 2
+  %2(CNode_11) = %1(%para4_input, %para5_other)
+      : (<Tensor[Float32], (1, 1)>, <Int64, NoShape>) -> (<null>)
+      #scope: (Default)
+      # In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/function/math_func.py:3039/    return bitwise_xor_(input, other)/
+  Return(%2)
+      : (<null>)
+      #scope: (Default)
+      # In file /home/adanilishin/myenvPython3.7/lib/python3.7/site-packages/mindspore/ops/function/math_func.py:3039/    return bitwise_xor_(input, other)/
+}
+# Order:
+#   1: @bitwise_xor_4:CNode_11{[0]: ValueNode<PrimitivePy> Cast, [1]: param_other, [2]: ValueNode<Float> Float32}
+#   2: @bitwise_xor_4:CNode_10{[0]: ValueNode<Primitive> resolve, [1]: ValueNode<NameSpace> SymbolStr: 'Namespace:mindspore.ops.function.math_func', [2]: ValueNode<Symbol> bitwise_xor_}
+#   3: @bitwise_xor_4:CNode_12{[0]: ValueNode<Primitive> resolve, [1]: ValueNode<NameSpace> CommonOPS: 'Namespace:mindspore._extends.parse.trope', [2]: ValueNode<Symbol> MakeTuple}
+#   4: @bitwise_xor_4:CNode_13{[0]: CNode_12, [1]: param_input, [2]: param_other}
+#   5: @bitwise_xor_4:CNode_11{[0]: CNode_10, [1]: param_input, [2]: param_other}
+#   6: @bitwise_xor_4:CNode_14{[0]: ValueNode<Primitive> Return, [1]: CNode_11}
+
+
+# ===============================================================================================
+# The total of function graphs in evaluation stack: 3/5 (Ignored 2 internal frames).
+# ===============================================================================================
+
+
+# ===============================================================================================
+# The rest function graphs are the following:
+# ===============================================================================================
+No more function graphs.
+

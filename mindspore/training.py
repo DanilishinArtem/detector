@@ -9,6 +9,7 @@ from mindspore.train.callback import ModelCheckpoint, CheckpointConfig
 from mindspore.nn.loss import SoftmaxCrossEntropyWithLogits
 from mindspore import context, Tensor
 import logging
+import copy
 
 
 context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
