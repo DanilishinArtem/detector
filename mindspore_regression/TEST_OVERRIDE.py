@@ -2,7 +2,7 @@ import mindspore.train.model as Model
 import logging
 import mindspore.nn as nn
 import time
-
+from mindspore import jit
 
 network_ = None
 
@@ -14,21 +14,15 @@ def override_Model(self, network, loss_fn=None, optimizer=None, metrics=None, ev
 Model.Model.__init__ = override_Model
 
 # ----------------------------------------------
-
 faulting_layer = None
-start_of_faulting = 5 # np.random.randint(100)
+start_of_faulting = 10 # np.random.randint(100)
 time_of_faulting = 1
-
 
 # matmul fault ----------------------->
 def mod_matmul(x, weight):
-    # print('injecting matmul fault...')
+    x[1,:] = 1
     result = faulting_layer.matmul(x, weight)
-    print('result of matmul before injection')
-    print(result)
-    print('result of matmul after injection')
-    result[0:25,:] = 1000
-    print(result)
+    # result[0:25,:] = 1
     return result
 
 class ModifiedDenseMatmulFault(nn.Dense):
@@ -45,12 +39,7 @@ class ModifiedDenseWeightFault(nn.Dense):
         super(ModifiedDenseWeightFault, self).__init__(*args, **kwargs)
 
     def construct(self, x):
-        print('injecting weight fault...')
-        print('weights before injection')
-        print(self.weight)
-        print('weight after injection')
-        self.weight[0:25,:] = 1000
-        print(self.weight)
+        self.weight[0:25,:] = 1
         return super().construct(x)
 
 # data fault ----------------------->
@@ -59,12 +48,7 @@ class ModifiedDenseDataFault(nn.Dense):
         super(ModifiedDenseDataFault, self).__init__(*args, **kwargs)
 
     def construct(self, x):
-        print('injecting data fault...')
-        print('datas before injection')
-        print(x)
-        print('data after injection')
-        x[0:25,:] = 1000
-        print(x)
+        x[0:25,:] = 1
         return super().construct(x)
     
 
@@ -81,24 +65,28 @@ def override_check_network_mode(self, network, is_train):
 
     if self._current_step_num == start_of_faulting:
         context.set_context(save_graphs=3, save_graphs_path="./graph")
-        faulting_layer = self._train_network.network._backbone.fc2
+        faulting_layer = self._train_network.network._backbone.fc
         logging.warning('[injecting dense layer...]')
 
-        modified_dense_layer = ModifiedDenseMatmulFault(in_channels=faulting_layer.in_channels, out_channels=faulting_layer.out_channels, weight_init=faulting_layer.weight, bias_init=faulting_layer.bias, has_bias=faulting_layer.has_bias, activation=faulting_layer.activation)
+        attributes_instance1 = vars(faulting_layer)
         
-        self._train_network.network._backbone._cells['fc2'] = modified_dense_layer
+        modified_dense_layer = ModifiedDenseMatmulFault(in_channels=faulting_layer.in_channels, out_channels=faulting_layer.out_channels, weight_init=faulting_layer.weight, bias_init=faulting_layer.bias, has_bias=faulting_layer.has_bias, activation=faulting_layer.activation)
+        # modified_dense_layer = ModifiedDenseWeightFault(in_channels=faulting_layer.in_channels, out_channels=faulting_layer.out_channels, weight_init=faulting_layer.weight, bias_init=faulting_layer.bias, has_bias=faulting_layer.has_bias, activation=faulting_layer.activation)
+        # modified_dense_layer = ModifiedDenseDataFault(in_channels=faulting_layer.in_channels, out_channels=faulting_layer.out_channels, weight_init=faulting_layer.weight, bias_init=faulting_layer.bias, has_bias=faulting_layer.has_bias, activation=faulting_layer.activation)
+        
+        
+        for attr_name, attr_value in attributes_instance1.items():
+            if attr_name != 'matmul':
+                setattr(modified_dense_layer, attr_name, attr_value)        
         self._train_network._create_time = int(time.time() * 1e9)
-
-        self._train_network.network._get_attr_from_cell(self._train_network.network._backbone)
-        self._train_network._auto_prefix = True
-        # network._auto_prefix = True
-        # self._train_network.network = self._train_network.network
-        # self._network = self._train_network
+        self._train_network.network._backbone._cells['fc'] = modified_dense_layer
 
 
-    # if self._current_step_num == start_of_faulting + time_of_faulting:
-        # self._train_network.network._backbone._cells['fc2'] = faulting_layer
-        # self._train_network._create_time = int(time.time() * 1e9)
+
+    if self._current_step_num == start_of_faulting + time_of_faulting:
+        context.set_context(save_graphs=3, save_graphs_path="./graph_res")
+        self._train_network.network._backbone._cells['fc'] = faulting_layer
+        self._train_network._create_time = int(time.time() * 1e9)
 
     ret_train_network = backup_check_network_mode(self, network, is_train)
     return ret_train_network

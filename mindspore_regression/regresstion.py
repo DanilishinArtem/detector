@@ -15,6 +15,7 @@ device_id = 0
 context.set_context(mode=context.GRAPH_MODE, device_target="CPU")
 # context.set_context(mode=context.PYNATIVE_MODE, device_target="CPU")
 context.set_context(device_id=device_id)
+# context.set_context(save_graphs=3, save_graphs_path="./graph")
 
 def get_data(num, w=2.0, b=3.0):
     for _ in range(num):
@@ -40,20 +41,20 @@ class LinearModel(nn.Cell):
     def __init__(self):
         super(LinearModel, self).__init__()
         self.fc = nn.Dense(1, 1, weight_init=Normal(0.02), bias_init=Normal(0.02))
-        self.foo = foo
+        # self.foo = foo
         # self.foo = ops.PyFunc(foo, in_types=[mindspore.float32], in_shapes=[(1,)], out_types=[mindspore.float32], out_shapes=[(1,)], name="foo", stateful=True)
 
     def construct(self, x):
         x = self.fc(x)
-        x = self.foo(x)
+        # x = self.foo(x)
         return x
 
 # ------------------------------------------------------------
 
 if __name__ == '__main__':
-    data_number = 1
-    batch_number = 1
-    repeat_number = 1
+    data_number = 10000
+    batch_number = 32
+    repeat_number = 1000
     lr = 0.005
     momentum = 0.9
     net = LinearModel()
