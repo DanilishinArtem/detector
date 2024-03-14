@@ -1,13 +1,7 @@
 import mindspore.train.model as Model
 import logging
-import numpy as np
-from mindspore import Tensor
-import mindspore as ms
-import types
-import functools
 import mindspore.nn as nn
-import mindspore.common.dtype as mstype
-from mindspore import context
+import time
 
 
 network_ = None
@@ -28,13 +22,13 @@ time_of_faulting = 10
 
 # matmul fault ----------------------->
 def mod_matmul(x, weight):
-    print('injecting matmul fault...')
+    # print('injecting matmul fault...')
     result = faulting_layer.matmul(x, weight)
-    print('result of matmul before injection')
-    print(result)
-    print('result of matmul after injection')
+    # print('result of matmul before injection')
+    # print(result)
+    # print('result of matmul after injection')
     result[0:25,:] = 1000
-    print(result)
+    # print(result)
     return result
 
 class ModifiedDenseMatmulFault(nn.Dense):
@@ -84,54 +78,29 @@ def override_check_network_mode(self, network, is_train):
     global network_
     from mindspore.train import amp
     
-    ret_train_network = backup_check_network_mode(self, network, is_train)
+    
     if self._current_step_num == start_of_faulting:
         faulting_layer = self._train_network.network._backbone.fc2
         logging.warning('[injecting dense layer...]')
 
-        modified_dense_layer = ModifiedDenseMatmulFault(in_channels=faulting_layer.in_channels,out_channels=faulting_layer.out_channels,weight_init=faulting_layer.weight,bias_init=faulting_layer.bias,has_bias=faulting_layer.has_bias,activation=faulting_layer.activation)
-        # modified_dense_layer = ModifiedDenseWeightFault(in_channels=faulting_layer.in_channels,out_channels=faulting_layer.out_channels,weight_init=faulting_layer.weight,bias_init=faulting_layer.bias,has_bias=faulting_layer.has_bias,activation=faulting_layer.activation)
-        # modified_dense_layer = ModifiedDenseDataFault(in_channels=faulting_layer.in_channels,out_channels=faulting_layer.out_channels,weight_init=faulting_layer.weight,bias_init=faulting_layer.bias,has_bias=faulting_layer.has_bias,activation=faulting_layer.activation)
-
-        # self._train_network.network._backbone.fc2 = modified_dense_layer
-        # self._network.fc2 = modified_dense_layer
-        self._train_network.network._backbone.fc2 = modified_dense_layer
-
-
-        if self._optimizer:
-            amp_config = {}
-            if self._loss_scale_manager_set:
-                amp_config['loss_scale_manager'] = self._loss_scale_manager
-            if self._keep_bn_fp32 is not None:
-                amp_config['keep_batchnorm_fp32'] = self._keep_bn_fp32
-            
-
-        optimizer = self._optimizer
-        loss_fn = self._loss_fn
-        level='O0'
-        boost_level='O0'
-        kwargs = amp_config
-
-        from mindspore import _checkparam as validator
-        from mindspore import boost
-
-        validator.check_value_type('optimizer', optimizer, (nn.Optimizer, boost.FreezeOpt,
-                                                            nn.AdaSumByGradWrapCell, nn.AdaSumByDeltaWeightWrapCell))
-
-        level, enable_boost = amp._check_level(level, boost_level)
-        config = dict(amp._config_level.get(level), **kwargs)
+        modified_dense_layer = ModifiedDenseMatmulFault(in_channels=faulting_layer.in_channels, out_channels=faulting_layer.out_channels, weight_init=faulting_layer.weight, bias_init=faulting_layer.bias, has_bias=faulting_layer.has_bias, activation=faulting_layer.activation)
         
-        # self._train_network = amp._add_loss_network(self._train_network.network._backbone, loss_fn, config["cast_model_type"])
-        self._train_network = self._train_network.network
-        
-        loss_scale = None
-        self._train_network = nn.TrainOneStepCell(self._train_network, self._optimizer, loss_scale).set_train()
+        start_time = time.time()
+        self._train_network.network._backbone._cells['fc2'] = modified_dense_layer
+        self._train_network._create_time = int(time.time() * 1e9)
+        opt_recomp = (time.time() - start_time)
+        print("optimized recompilation:", opt_recomp, "секунд")
 
+        start_time = time.time()
+        self._train_network.network._backbone._cells['fc2'] = modified_dense_layer
+        self._train_network = self._build_train_network()
+        vanilla_recomp = (time.time() - start_time)
+        print("vanilla recompilation:", vanilla_recomp, "секунд")
+        print("total speedup: ", (vanilla_recomp / opt_recomp), " times")
 
-    elif self._current_step_num == start_of_faulting + time_of_faulting:
-        self._train_network.network._backbone.fc2 = faulting_layer
-        # self._train_network = self._build_train_network()
+    ret_train_network = backup_check_network_mode(self, network, is_train)
     return ret_train_network
+
 Model.Model._check_network_mode = override_check_network_mode
 
 
